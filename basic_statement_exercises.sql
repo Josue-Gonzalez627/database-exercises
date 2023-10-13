@@ -12,7 +12,7 @@ SELECT name FROM albums;
 
 -- What do you think the sales column represents?
 SELECT sales FROM albums;
--- A: Represents the amount of album copies sold
+-- A: Represents the amount of album Sales. (perhaps copies sold)
 
 -- Find the name of all albums by Pink Floyd.
 SELECT artist, name
@@ -37,7 +37,8 @@ WHERE name = 'Nevermind';
 -- Which albums were released in the 1990s?
 SELECT name, release_date
 FROM albums
-WHERE release_date > 1989 and release_date < 2000;
+WHERE release_date > 1989 and release_date < 2000
+order by release_date desc;
 /* A:
 Come On Over
 Dangerous
@@ -56,7 +57,8 @@ SELECT
 	name AS low_selling_albums,
     sales
 FROM albums
-WHERE sales < 20;
+WHERE sales < 20
+ORDER by sales desc;
 /* A: 
 Grease: The Original Soundtrack from the Motion Picture
 Bad
