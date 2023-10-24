@@ -213,7 +213,7 @@ join salaries s
 	on e.emp_no=s.emp_no and
     s.to_date > NOW()
 join dept_manager dm
-	on dm.emp_no=e.emp_no and
+	on dm.emp_no = e.emp_no and
     dm.to_date > NOW()
 join departments d
 	on d.dept_no=dm.dept_no
