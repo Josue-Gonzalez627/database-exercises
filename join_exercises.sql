@@ -43,7 +43,7 @@ right join users u
 -- count number of user --
 
 select 
-	COUNT(u.id) -- to explicitly count users (don't use * here)
+		COUNT(u.id) -- to explicitly count users (don't use * here)
     ,r.name
 from roles r
 left join users u 
@@ -184,18 +184,19 @@ describe dept_emp; -- dept_no & emp_no (associative table)
 
 select
 	e.first_name,
-    e.last_name,
+    e.last_name
 from employees e
 join salaries s
-	on e.emp_no=s.emp_no and
+	on e.emp_no=s.emp_no
 join dept_emp de
-	on de.emp_no=e.emp_no and
+	on de.emp_no=e.emp_no
 join departments d
 	on d.dept_no=de.dept_no
 where d.dept_name = 'Marketing'
 order by s.salary DESC
 limit 1
-; -- COME BACK TO THIS ONE ON REPO (NOT RUNNING) --
+;
+
 
 -- 9. Which current department manager has the highest salary?
 describe dept_manager;
