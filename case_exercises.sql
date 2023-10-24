@@ -77,11 +77,48 @@ GROUP BY dept_group
 -- BONUS
 
 -- Remove duplicate employees from exercise 1.			-- Go to REPO  :D --
-select emp_no, max(to_date);
+select emp_no, max(to_date) -- finding max to_date for each employee
+from dept_emp
+group by emp_no
+; -- using this as our inner query
 
-
+select 
+	e.emp_no
+	, concat(e.first_name, ' ', e.last_name) as full_name
+    , de.dept_no
+    , de.from_date
+    , de.to_date
+    , IF(de.to_date > now(), True, False) as 'is_current_employee'
+from employees as e
+	join dept_emp as de
+		using (emp_no)
+	join 
+		( -- max to_date for each employee
+        select emp_no, max(to_date) as to_date
+        from dept_emp
+        group by emp_no
+        ) as md
+        on e.emp_no = md.emp_no -- joining on emp_no AND to_date
+			and de.to_date = md.to_date
 ;
 
 
+#ANOTHER WAY
 
-
+select
+	emp_no
+	, concat(first_name, ' ', last_name) as full_name
+    , dept_no
+    , from_date
+    , to_date
+    , IF(to_date > now(), True, False) as 'is_current_employee'
+from employees
+	join dept_emp
+		using (emp_no)
+where (emp_no, to_date) IN 
+	(
+    select emp_no, max(to_date)
+	from dept_emp
+	group by emp_no
+    )
+;
