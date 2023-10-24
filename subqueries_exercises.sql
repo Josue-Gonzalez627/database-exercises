@@ -13,6 +13,10 @@ SHOW tables; -- departments, dept_emp, dept_manager, employees, salaries, titles
 				--                 )  
 							-- What I tried...
 ;
+select hire_date
+from employees
+WHERE emp_no = '101010'
+;
             select *
             from employees 
 				JOIN dept_emp
@@ -31,30 +35,30 @@ DESCRIBE titles; -- emp_no, titles
 DESCRIBE employees; -- emp_no, first_name
 
 
--- SELECT e.emp_no, first_name, last_name, title, to_date
--- FROM employees as e -- left table
--- 	JOIN titles as t -- right table
--- 		ON e.emp_no = t.emp_no -- Can use "USING (emp_no)" also since the column is the same and that way, the 'emp_no' column won't be repeated!
--- WHERE e.emp_no IN (
--- 		SELECT emp_no
---         FROM titles as t
--- )
--- AND to_date > NOW()
--- AND first_name = 'Aamod'						-- what I tried...
-;
-
-		select DISTINCT title 	-- Can do a group by but since we don't have a count (aggregate function), DISTINCT is fine!
-		from titles
-			-- join employees	
-				-- using (emp_no)		-- This JOIN is optional to check the names column to check my work but not necessary.
-		where emp_no IN 
-				(
-				select emp_no 		-- can throw inside my WHERE clause cause it's a SinGlE ColUmn!
-				from employees
-				where first_name = 'Aamod'
-				)
-		AND to_date > now() -- same result with or without BUT it does state 'current' employees
+		-- SELECT e.emp_no, first_name, last_name, title, to_date
+		-- FROM employees as e -- left table
+		-- 	JOIN titles as t -- right table
+		-- 		ON e.emp_no = t.emp_no -- Can use "USING (emp_no)" also since the column is the same and that way, the 'emp_no' column won't be repeated!
+		-- WHERE e.emp_no IN (
+		-- 		SELECT emp_no
+		--         FROM titles as t
+		-- )
+		-- AND to_date > NOW()
+		-- AND first_name = 'Aamod'						-- what I tried...
 		;
+
+select DISTINCT title 	-- Can do a group by but since we don't have a count (aggregate function), DISTINCT is fine!
+from titles
+	-- join employees	
+		-- using (emp_no)		-- This JOIN is optional to check the names column to check my work but not necessary.
+where emp_no IN 
+		(
+		select emp_no 		-- can throw inside my WHERE clause cause it's a SinGlE ColUmn!
+		from employees
+		where first_name = 'Aamod'
+		)
+AND to_date > now() -- same result with or without BUT it does state 'current' employees
+;
 
 -- 3. How many people in the employees table are no longer working for the company? 
 -- Give the answer in a comment in your code.
@@ -66,6 +70,7 @@ where emp_no NOT IN -- filtering out the CurRenT employees
 		(
 		select emp_no
 		from dept_emp
+        -- where to_date like '9999%'
 		where to_date > now() -- Do this first to see who is current, TheN remove them
 		-- where to_date < now() -- This doesn't work because they may have changed departments or salaries... 
 								-- So it loOkS like they are no longer working there but in reality, they just no longer work in ThAt depArTmeNt!
@@ -76,6 +81,7 @@ where emp_no NOT IN -- filtering out the CurRenT employees
 -- List their names in a comment in your code.
 				-- 4 rows -- 
 select concat(first_name, ' ', last_name) as female_manager_current 	-- Could do an * or you can make it simpler, either is fine!
+		, gender
 from employees
 where gender = 'F'
 	and emp_no IN
@@ -127,7 +133,7 @@ where to_date > now()
 select count(*)
 from salaries
 where salary >=
-	( -- cutoff point
+	( -- cutoff point ~140k
 		select max(salary) - std(salary) AS cutoff -- this is the CutOfF point (140,910.04)
 		from salaries
 		where to_date > now()
@@ -166,12 +172,74 @@ select
 -- BONUS
 
 -- 1. Find all the department names that currently have female managers.
-
+select first_name, last_name, gender, dept_name
+from employees
+	join dept_emp
+		using (emp_no)
+	join departments 
+		using (dept_no)
+where gender = 'F'
+	and emp_no in 
+		(
+        select emp_no
+		from dept_manager
+		where to_date > now()
+        )
+;
 
 -- 2. Find the first and last name of the employee with the highest salary.
-
+select 
+	first_name
+    , last_name
+    , salary
+from employees
+	join salaries
+		on employees.emp_no = salaries.emp_no
+where salary = 
+	(
+    select max(salary)
+    from salaries
+    )
+;
 
 -- 3. Find the department name that the employee with the highest salary works in.
-
+select 
+	first_name
+    , last_name
+    , salary
+    , dept_name
+from employees
+	join salaries
+		on employees.emp_no = salaries.emp_no
+	join dept_emp
+		on dept_emp.emp_no = employees.emp_no
+	join departments
+		on departments.dept_no = dept_emp.dept_no
+where salary = 
+	(
+    select max(salary)
+    from salaries
+    )
+;
 
 -- 4. Who is the highest paid employee within each department.
+select
+	concat(first_name, ' ', last_name) as full_name
+   , max_sal
+   , dept_name
+from 
+	(
+	select dept_name, max(salary) as max_sal
+	from salaries
+		join dept_emp
+			using (emp_no)
+		join departments
+			using (dept_no)
+	group by dept_name
+    ) as ms
+    join salaries as s
+		on s.salary = ms.max_sal -- notice what this join is joining ON! 
+        -- might need clarification on this later on ^
+	join employees
+		using (emp_no)
+;
